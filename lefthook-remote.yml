@@ -1,0 +1,12 @@
+---
+pre-commit:
+  commands:
+    nix-no-embedded-shell:
+      glob: "*.nix"
+      run: timeout ${LEFTHOOK_NIX_NO_EMBEDDED_SHELL_TIMEOUT:-30} lefthook-nix-no-embedded-shell {staged_files}
+
+pre-push:
+  commands:
+    nix-no-embedded-shell:
+      glob: "*.nix"
+      run: timeout ${LEFTHOOK_NIX_NO_EMBEDDED_SHELL_TIMEOUT:-30} lefthook-nix-no-embedded-shell {push_files}
