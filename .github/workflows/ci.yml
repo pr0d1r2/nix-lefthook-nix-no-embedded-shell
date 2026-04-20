@@ -20,9 +20,9 @@ jobs:
       - name: Build
         run: nix build
       - name: Pre-commit checks
-        run: TERM=dumb nix develop --ignore-environment --keep TERM --command bash -c 'lefthook run pre-commit --all-files'
+        run: TERM=dumb nix develop --impure --ignore-environment --keep TERM --command bash -c 'lefthook run pre-commit --all-files'
       - name: Pre-push checks
-        run: TERM=dumb nix develop --ignore-environment --keep TERM --command bash -c 'lefthook run pre-push --all-files'
+        run: TERM=dumb nix develop --impure --ignore-environment --keep TERM --command bash -c 'lefthook run pre-push --all-files'
 
   build-macos:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
@@ -36,6 +36,6 @@ jobs:
       - name: Build
         run: nix build
       - name: Pre-commit checks
-        run: TERM=dumb nix develop --ignore-environment --keep TERM --command bash -c 'lefthook run pre-commit --all-files'
+        run: TERM=dumb nix develop --impure --ignore-environment --keep TERM --command bash -c 'lefthook run pre-commit --all-files'
       - name: Pre-push checks
-        run: TERM=dumb nix develop --ignore-environment --keep TERM --command bash -c 'lefthook run pre-push --all-files'
+        run: TERM=dumb nix develop --impure --ignore-environment --keep TERM --command bash -c 'lefthook run pre-push --all-files'
