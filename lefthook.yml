@@ -65,7 +65,7 @@ pre-commit:
       run: timeout ${LEFTHOOK_NIX_NO_EMBEDDED_SHELL_TIMEOUT:-30} lefthook-nix-no-embedded-shell {staged_files}
     nix-flake-check:
       glob: "*.nix"
-      run: timeout ${LEFTHOOK_NIX_FLAKE_CHECK_TIMEOUT:-60} nix flake check --impure
+      run: timeout ${LEFTHOOK_NIX_FLAKE_CHECK_TIMEOUT:-60} nix flake check
 
 pre-push:
   parallel: true
@@ -75,4 +75,4 @@ pre-push:
       run: timeout ${LEFTHOOK_NIX_NO_EMBEDDED_SHELL_TIMEOUT:-30} lefthook-nix-no-embedded-shell {push_files}
     nix-flake-check:
       glob: "*.nix"
-      run: timeout ${LEFTHOOK_NIX_FLAKE_CHECK_TIMEOUT:-60} nix flake check --impure
+      run: timeout ${LEFTHOOK_NIX_FLAKE_CHECK_TIMEOUT:-60} nix flake check
