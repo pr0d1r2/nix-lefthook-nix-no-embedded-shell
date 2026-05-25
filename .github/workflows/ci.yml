@@ -13,29 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: cachix/install-nix-action@v31
+      - uses: pr0d1r2/nix-lefthook-ci-action@fc0c391434c5603e8289549b3cc91f922896cc51
         with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-      - name: Build
-        run: nix build
-      - name: Install lefthook remotes
-        run: TERM=dumb nix develop .#ci --ignore-environment --keep TERM --command lefthook install
-      - name: Lefthook checks
-        run: TERM=dumb nix develop .#ci --ignore-environment --keep TERM --command bash -c 'LEFTHOOK_NIX_FLAKE_CHECK_TIMEOUT=300 lefthook run pre-push --all-files'
+          flake-check-timeout: '300'
 
   build-macos:
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v6
-      - uses: cachix/install-nix-action@v31
+      - uses: pr0d1r2/nix-lefthook-ci-action@fc0c391434c5603e8289549b3cc91f922896cc51
         with:
-          extra_nix_config: |
-            experimental-features = nix-command flakes
-      - name: Build
-        run: nix build
-      - name: Install lefthook remotes
-        run: TERM=dumb nix develop .#ci --ignore-environment --keep TERM --command lefthook install
-      - name: Lefthook checks
-        run: TERM=dumb nix develop .#ci --ignore-environment --keep TERM --command bash -c 'LEFTHOOK_NIX_FLAKE_CHECK_TIMEOUT=300 lefthook run pre-push --all-files'
+          flake-check-timeout: '300'
