@@ -14,22 +14,22 @@ in_block=0
 block_start=0
 i=0
 while [ "$i" -lt "$n" ]; do
-    line="${lines[$i]}"
-    rest="$line"
-    while [[ "$rest" == *"''"* ]]; do
-        rest="${rest#*\'\'}"
-        if [ "$in_block" -eq 0 ]; then
-            in_block=1
-            block_start=$((i + 1))
-        else
-            in_block=0
-        fi
-    done
-    if [ "$in_block" -eq 1 ] && [ $((i + 1)) -ne "$block_start" ]; then
-        if [[ $line =~ $shell_pattern ]] ||
-            [[ $line =~ $func_pattern ]]; then
-            printf '    %s: %s\n' "$((i + 1))" "$line"
-        fi
+  line="${lines[$i]}"
+  rest="$line"
+  while [[ "$rest" == *"''"* ]]; do
+    rest="${rest#*\'\'}"
+    if [ "$in_block" -eq 0 ]; then
+      in_block=1
+      block_start=$((i + 1))
+    else
+      in_block=0
     fi
-    i=$((i + 1))
+  done
+  if [ "$in_block" -eq 1 ] && [ $((i + 1)) -ne "$block_start" ]; then
+    if [[ $line =~ $shell_pattern ]] ||
+      [[ $line =~ $func_pattern ]]; then
+      printf '    %s: %s\n' "$((i + 1))" "$line"
+    fi
+  fi
+  i=$((i + 1))
 done
