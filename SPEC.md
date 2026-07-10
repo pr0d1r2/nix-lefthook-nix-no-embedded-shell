@@ -1,0 +1,101 @@
+# SPEC — nix-lefthook-nix-no-embedded-shell
+
+## §D — Description
+
+A lefthook-compatible linter that detects embedded shell code inside Nix multi-line string blocks (`''...''`) in `.nix` files, enforcing the practice of extracting shell scripts into separate files and referencing them via `builtins.readFile`. Packaged as a Nix flake with cross-platform support (Linux and macOS, amd64 and arm64), it integrates into pre-commit and pre-push hooks through lefthook, either as a remote config or a flake input. Target users are Nix developers who want to maintain clean separation between Nix expressions and shell logic in their projects.
+
+## §V — Invariants
+
+1. The scanner (`scan-nix-no-embedded-shell.sh`) always exits 0 regardless of findings; it reports hits on stdout.
+2. The wrapper (`lefthook-nix-no-embedded-shell`) exits 0 with no arguments.
+3. The wrapper exits 0 when no `.nix` files appear in its arguments; non-`.nix` files are silently ignored.
+4. Missing files are silently skipped (no error).
+5. The wrapper exits 1 when any scanned `.nix` file contains embedded shell and is not in the allowlist.
+6. The allowlist (`.nix-embedded-shell-allowlist`) supports blank lines and `#`-prefixed comments; both are ignored.
+7. Allowlist paths are relative to the project root (git toplevel or `$NIX_NO_EMBEDDED_SHELL_ROOT`).
+8. Every lefthook command has a `timeout` with a configurable environment variable and a default fallback.
+9. All checks run in both `pre-commit` (on `{staged_files}`) and `pre-push` (on `{push_files}`).
+10. The flake builds on all four supported systems: `aarch64-darwin`, `x86_64-darwin`, `x86_64-linux`, `aarch64-linux`.
+11. Every shell script has a 1-to-1 bats unit test file under `tests/unit/`.
+12. CI runs on both `ubuntu-latest` and `macos-latest`.
+13. Shell scripts must not define functions; logic is split into separate scripts.
+14. Scripts are invoked via `bash script.sh`, never `./script.sh`.
+15. The `dev.sh` shell hook installs lefthook only when `.git/hooks/pre-commit` is absent.
+16. The `devShells.ci` output is identical to `devShells.default` (aliased via `ci = default`).
+
+## §I — Interfaces
+
+### CLI
+
+| command | arguments | exit code | description |
+|---|---|---|---|
+| `lefthook-nix-no-embedded-shell` | `[file ...]` | 0 on pass, 1 on violation | Scan `.nix` files for embedded shell in `''` blocks |
+| `bash scan-nix-no-embedded-shell.sh` | `<file>` | always 0 | Low-level scanner; prints `    <line>: <content>` per hit |
+
+### Nix flake outputs
+
+| output | type | description |
+|---|---|---|
+| `packages.<system>.default` | `writeShellApplication` | The `lefthook-nix-no-embedded-shell` wrapper binary |
+| `devShells.<system>.default` | `mkShell` | Dev shell with all tools, lefthook wrappers, and bats |
+| `devShells.<system>.ci` | `mkShell` | Alias of `default` for CI usage |
+
+### Config files
+
+| file | format | purpose |
+|---|---|---|
+| `.nix-embedded-shell-allowlist` | plain text, one relative path per line | Grandfathered files to skip |
+| `lefthook-remote.yml` | YAML (lefthook remote config) | Drop-in remote config for consumers |
+| `lefthook.yml` | YAML (lefthook config) | Local hooks including remotes for 15 external check repos |
+| `config/lefthook/file_size_limits.yml` | YAML | Per-extension file size limits (bytes) |
+| `.yamllint.yml` | YAML | yamllint configuration |
+| `.markdownlint.yml` | YAML | markdownlint configuration |
+| `.editorconfig` | INI | Editor formatting rules (2-space indent, UTF-8, LF) |
+
+### Environment variables
+
+| variable | default | scope | description |
+|---|---|---|---|
+| `NIX_NO_EMBEDDED_SHELL_ROOT` | `git rev-parse --show-toplevel` or `pwd` | wrapper | Override project root for allowlist lookup |
+| `LEFTHOOK_NIX_NO_EMBEDDED_SHELL_TIMEOUT` | `30` | lefthook | Timeout in seconds for the check |
+| `LEFTHOOK_NIX_FLAKE_CHECK_TIMEOUT` | `60` | lefthook | Timeout for `nix flake check` |
+| `SCANNER` | set by flake to nix store path | wrapper internals | Path to `scan-nix-no-embedded-shell.sh` |
+| `BATS_LIB_PATH` | set by `dev.sh` shell hook | dev shell | Path to bats helper libraries |
+
+### Shell patterns detected
+
+The scanner flags lines inside `''` blocks matching:
+
+- `set -[eux]+`, `export`, `unset`, `echo`, `printf`, `exec`
+- `if`, `elif`, `for`, `while`, `until`, `case`, `exit`, `return`, `local`
+- Function definitions: `name() {`
+
+## §T — Tasks
+
+| status | id | goal |
+|---|---|---|
+| `.` | T1 | Expand `.envrc` to watch `flake.nix`, `dev.sh`, and nix modules per project direnv conventions |
+| `.` | T2 | Add bats test for wrapper behavior when multiple files have violations (verify all are reported) |
+| `.` | T3 | Add bats test for scanner handling of Nix string interpolation `''${}` inside multi-line blocks |
+| `.` | T4 | Add `checks` flake output that runs `bats tests/unit/` so `nix flake check` validates tests |
+| `.` | T5 | Align `actions/checkout` version in `update-pins.yml` (v4) with `ci.yml` (v6) |
+| `.` | T6 | Add scanner detection of `source` and `.` (dot-source) commands as shell patterns |
+| `.` | T7 | Add test for allowlist with entry that does not match the scanned file (non-matching allowlist entry) |
+| `.` | T8 | Add detection of `#!/bin/bash` or `#!/usr/bin/env bash` shebang lines inside `''` blocks |
+| `.` | T9 | Document the self-linting exception in SPEC (flake.nix bootstraps `SCANNER=` via a small embedded snippet) |
+
+## §B — Bugs / Known Issues
+
+1. **Scanner requires bash 4+**: `mapfile` (scan script) and `declare -A` (wrapper) are bash 4+ features. This is safe inside the Nix dev shell (which provides bash 5) but will fail on stock macOS bash 3.2 if invoked outside Nix.
+
+2. **Greedy `''` token matching**: The scanner toggles an `in_block` flag on every `''` occurrence in a line. Nix string interpolation escapes (`''${`, `'''`) and lines with multiple `''` tokens on the same line can cause the block tracker to lose sync, producing false positives or negatives.
+
+3. **`.envrc` does not watch dependencies**: The `.envrc` contains only `use flake` and does not `watch_file` on `flake.nix`, `dev.sh`, or other nix modules. Changes to these files require manual `direnv reload`.
+
+4. **Self-referential embedded shell**: `flake.nix` line 202-204 contains `text = '' SCANNER="${scannerScript}" '' + builtins.readFile ...` — a small embedded shell snippet needed to inject the scanner path. This would trigger the check itself, but the flake is in the allowlist by convention (the check runs on staged files that are `.nix`).
+
+5. **No `source`/`.` detection**: The scanner does not flag `source` or `.` (dot-source) commands, which are common shell patterns that would indicate embedded shell code.
+
+6. **`actions/checkout` version skew**: `ci.yml` uses `actions/checkout@v6` while `update-pins.yml` uses `actions/checkout@v4`. This is a maintenance inconsistency, not a functional bug.
+
+7. **`nix flake check` runs without `checks` output**: The lefthook config runs `nix flake check` but the flake only defines `packages` and `devShells` — no `checks` attribute. The command still validates derivation evaluation but does not run tests.
