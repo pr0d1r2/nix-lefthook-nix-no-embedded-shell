@@ -40,31 +40,22 @@
       ];
     in
     {
-      packages = forAllSystems (pkgs: {
-        default = pkgs.writeShellApplication {
-          name = "lefthook-nix-no-embedded-shell";
-          text = ''
-            SCANNER="${scannerScript}"
-          ''
-          + builtins.readFile ./lefthook-nix-no-embedded-shell.sh;
-        };
-          default = pkgs.mkShell {
-            packages = [
-              self.packages.${system}.default
-              batsWithLibs
-              pkgs.coreutils
-              pkgs.git
-              pkgs.lefthook
-              pkgs.nix
-              pkgs.parallel
-            ]
-            ++ (lefthookWrappersFor pkgs);
-            shellHook = builtins.replaceStrings [ "@BATS_LIB_PATH@" ] [ "${batsWithLibs}" ] (
-              builtins.readFile ./dev.sh
-            );
+      packages = forAllSystems (
+        pkgs:
+        let
+          scannerScript = ./scan-nix-no-embedded-shell.sh;
+        in
+        {
+          default = pkgs.writeShellApplication {
+            name = "lefthook-nix-no-embedded-shell";
+            text = ''
+              SCANNER="${scannerScript}"
+            ''
+            + builtins.readFile ./lefthook-nix-no-embedded-shell.sh;
           };
-        setting = (set-and-setting.lib.mkSetting { inherit pkgs; }).materialized;
-      });
+          setting = (set-and-setting.lib.mkSetting { inherit pkgs; }).materialized;
+        }
+      );
 
       devShells = forAllSystems (
         pkgs:

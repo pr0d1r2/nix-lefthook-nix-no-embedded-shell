@@ -99,3 +99,5 @@ The scanner flags lines inside `''` blocks matching:
 6. **`actions/checkout` version skew**: `ci.yml` uses `actions/checkout@v6` while `update-pins.yml` uses `actions/checkout@v4`. This is a maintenance inconsistency, not a functional bug.
 
 7. **`nix flake check` runs without `checks` output**: The lefthook config runs `nix flake check` but the flake only defines `packages` and `devShells` — no `checks` attribute. The command still validates derivation evaluation but does not run tests.
+
+8. **Duplicate `default` attribute in `packages`**: Migration left a stale `default = pkgs.mkShell { … }` block inside `packages`, colliding with the real `default = pkgs.writeShellApplication { … }`. Also left `scannerScript` undefined. Fixed by removing the leftover `mkShell` block and adding a `let` binding for `scannerScript`.
