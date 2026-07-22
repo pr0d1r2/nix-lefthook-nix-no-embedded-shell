@@ -136,7 +136,7 @@ NIXEOF
     cat > "$TEST_TEMP/ifstmt.nix" << 'NIXEOF'
 {
   text = ''
-    if [ -f /tmp/foo ]; then
+    if [ -f tmp/foo ]; then
       true
     fi
   '';
