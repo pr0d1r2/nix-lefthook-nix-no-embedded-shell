@@ -7,6 +7,7 @@ file="$1"
 
 shell_pattern='^[[:space:]]*(set -[eux]+|export |unset |echo |printf |exec |if |elif |for |while |until |case |exit |return |local |source[[:space:]]+|\.[[:space:]]+)'
 func_pattern='^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\(\)[[:space:]]*\{'
+shebang_pattern='^[[:space:]]*#!(/bin/bash|/usr/bin/env bash)([[:space:]]|$)'
 
 mapfile -t lines <"$file"
 n=${#lines[@]}
@@ -31,7 +32,8 @@ while [ "$i" -lt "$n" ]; do
   done
   if [ "$in_block" -eq 1 ] && [ $((i + 1)) -ne "$block_start" ]; then
     if [[ $line =~ $shell_pattern ]] ||
-      [[ $line =~ $func_pattern ]]; then
+      [[ $line =~ $func_pattern ]] ||
+      [[ $line =~ $shebang_pattern ]]; then
       printf '    %s: %s\n' "$((i + 1))" "$line"
     fi
   fi
