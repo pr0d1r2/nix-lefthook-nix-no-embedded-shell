@@ -18,7 +18,7 @@ while [ "$i" -lt "$n" ]; do
   rest="$line"
   while [[ "$rest" == *"''"* ]]; do
     rest="${rest#*\'\'}"
-    if [ "$in_block" -eq 1 ] && [[ "$rest" == '${'* ]]; then
+    if [ "$in_block" -eq 1 ] && [[ "$rest" == "\${"* ]]; then
       rest="${rest:2}"
       continue
     fi

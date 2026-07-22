@@ -121,3 +121,5 @@ The scanner flags lines inside `''` blocks matching:
 11. **2026-07-22 — Invalid SPEC indentation**: Three continuations used three spaces.
 
     Fixed by using four spaces.
+
+12. **2026-07-22 — SC2016**: Single-quoted `${` match; fixed with escaped `$`.
