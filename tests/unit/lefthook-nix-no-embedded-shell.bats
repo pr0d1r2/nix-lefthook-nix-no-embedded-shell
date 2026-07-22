@@ -57,6 +57,31 @@ NIXEOF
     assert_output --partial "embedded shell"
 }
 
+@test "reports every file when multiple files have violations" {
+    cat > "$TEST_TEMP/first.nix" << 'NIXEOF'
+{
+  text = ''
+    export FIRST_VIOLATION=true
+  '';
+}
+NIXEOF
+    cat > "$TEST_TEMP/second.nix" << 'NIXEOF'
+{
+  text = ''
+    echo "second violation"
+  '';
+}
+NIXEOF
+    run lefthook-nix-no-embedded-shell \
+        "$TEST_TEMP/first.nix" \
+        "$TEST_TEMP/second.nix"
+    assert_failure
+    assert_output --partial "first.nix has embedded shell"
+    assert_output --partial "export FIRST_VIOLATION=true"
+    assert_output --partial "second.nix has embedded shell"
+    assert_output --partial 'echo "second violation"'
+}
+
 @test "respects allowlist" {
     cat > "$TEST_TEMP/bad.nix" << 'NIXEOF'
 { pkgs }:
