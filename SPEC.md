@@ -89,9 +89,11 @@ text = ''
 + builtins.readFile ./lefthook-nix-no-embedded-shell.sh;
 ```
 
-That small embedded snippet matches the shell patterns enforced by this
-project. The narrow, repository-local allowlist entry prevents the linter from
-rejecting its own required bootstrap; it does not change scanner or wrapper
+The scanner does not currently flag a bare variable assignment such as this
+one. It does flag other repository bootstrap code in `flake.nix`, including the
+`export` commands in the `confirm` app wrapper. Because allowlisting is
+file-granular, the narrow, repository-local entry covers all of that bootstrap
+code, including the `SCANNER` injection. It does not change scanner or wrapper
 behavior for consumers.
 
 ## §T — Tasks

@@ -9,4 +9,10 @@
 
     run grep -F '`flake.nix` is intentionally listed in `.nix-embedded-shell-allowlist`' SPEC.md
     [ "$status" -eq 0 ]
+
+    run grep -Fx 'flake.nix' .nix-embedded-shell-allowlist
+    [ "$status" -eq 0 ]
+
+    run grep -F 'SCANNER="${scannerScript}"' flake.nix
+    [ "$status" -eq 0 ]
 }
