@@ -2,7 +2,11 @@
 
 ## §D — Description
 
-A lefthook-compatible linter that detects embedded shell code inside Nix multi-line string blocks (`''...''`) in `.nix` files, enforcing the practice of extracting shell scripts into separate files and referencing them via `builtins.readFile`. Packaged as a Nix flake with cross-platform support (Linux and macOS, amd64 and arm64), it integrates into pre-commit and pre-push hooks through lefthook, either as a remote config or a flake input. Target users are Nix developers who want to maintain clean separation between Nix expressions and shell logic in their projects.
+A lefthook-compatible linter that detects embedded shell code inside Nix multi-line string blocks (`''...''`) in `.nix` files, enforcing the practice of extracting shell scripts into separate files and referencing them via `builtins.readFile`.
+
+Packaged as a Nix flake with cross-platform support (Linux and macOS, amd64 and arm64), it integrates into pre-commit and pre-push hooks through lefthook, either as a remote config or a flake input.
+
+Target users are Nix developers who want to maintain clean separation between Nix expressions and shell logic in their projects.
 
 ## §V — Invariants
 
@@ -30,7 +34,7 @@ A lefthook-compatible linter that detects embedded shell code inside Nix multi-l
 | command | arguments | exit code | description |
 |---|---|---|---|
 | `lefthook-nix-no-embedded-shell` | `[file ...]` | 0 on pass, 1 on violation | Scan `.nix` files for embedded shell in `''` blocks |
-| `bash scan-nix-no-embedded-shell.sh` | `<file>` | always 0 | Low-level scanner; prints `    <line>: <content>` per hit |
+| `bash scan-nix-no-embedded-shell.sh` | `<file>` | always 0 | Low-level scanner; prints four spaces followed by `<line>: <content>` per hit |
 
 ### Nix flake outputs
 
@@ -74,7 +78,7 @@ The scanner flags lines inside `''` blocks matching:
 
 | status | id | goal |
 |---|---|---|
-| `.` | T1 | Expand `.envrc` to watch `flake.nix`, `dev.sh`, and nix modules per project direnv conventions |
+| `x` | T1 | Expand `.envrc` to watch `flake.nix`, `dev.sh`, and nix modules per project direnv conventions |
 | `.` | T2 | Add bats test for wrapper behavior when multiple files have violations (verify all are reported) |
 | `.` | T3 | Add bats test for scanner handling of Nix string interpolation `''${}` inside multi-line blocks |
 | `.` | T4 | Add `checks` flake output that runs `bats tests/unit/` so `nix flake check` validates tests |
@@ -92,7 +96,9 @@ The scanner flags lines inside `''` blocks matching:
 
 3. **`.envrc` does not watch dependencies**: The `.envrc` contains only `use flake` and does not `watch_file` on `flake.nix`, `dev.sh`, or other nix modules. Changes to these files require manual `direnv reload`.
 
-4. **Self-referential embedded shell**: `flake.nix` line 202-204 contains `text = '' SCANNER="${scannerScript}" '' + builtins.readFile ...` — a small embedded shell snippet needed to inject the scanner path. This would trigger the check itself, but the flake is in the allowlist by convention (the check runs on staged files that are `.nix`).
+4. **Self-referential embedded shell**: `flake.nix` line 202-204 contains `text = '' SCANNER="${scannerScript}" '' + builtins.readFile ...` — a small embedded shell snippet needed to inject the scanner path.
+
+   This would trigger the check itself, but the flake is in the allowlist by convention (the check runs on staged files that are `.nix`).
 
 5. **No `source`/`.` detection**: The scanner does not flag `source` or `.` (dot-source) commands, which are common shell patterns that would indicate embedded shell code.
 
@@ -100,8 +106,14 @@ The scanner flags lines inside `''` blocks matching:
 
 7. **`nix flake check` runs without `checks` output**: The lefthook config runs `nix flake check` but the flake only defines `packages` and `devShells` — no `checks` attribute. The command still validates derivation evaluation but does not run tests.
 
-8. **Duplicate `default` attribute in `packages`**: Migration left a stale `default = pkgs.mkShell { … }` block inside `packages`, colliding with the real `default = pkgs.writeShellApplication { … }`. Also left `scannerScript` undefined. Fixed by removing the leftover `mkShell` block and adding a `let` binding for `scannerScript`.
+8. **Duplicate `default` attribute in `packages`**: Migration left a stale `default = pkgs.mkShell { … }` block inside `packages`, colliding with the real `default = pkgs.writeShellApplication { … }`. Also left `scannerScript` undefined.
 
-9. **Unpinned flake inputs broke hook/package coherence**: `flake.lock` was ignored, so CI resolved a moving `set-and-setting` revision whose generated `lefthook.yml` referenced markdown and YAML wrappers absent from the dev-shell `PATH`; the dependency-graph check also had no lockfile to inspect. Fixed by tracking `flake.lock` and pinning a coherent dependency graph.
+   Fixed by removing the leftover `mkShell` block and adding a `let` binding for `scannerScript`.
 
-10. **Confirm app omitted fragment tools from `PATH`**: The confirmation app checked generated lefthook commands using only its core utility runtime, so markdown and YAML wrappers were reported missing even though the dev shell contained them. Fixed by adding the materialized fragment packages to the app runtime.
+9. **Unpinned flake inputs broke hook/package coherence**: `flake.lock` was ignored, so CI resolved a moving `set-and-setting` revision whose generated `lefthook.yml` referenced markdown and YAML wrappers absent from the dev-shell `PATH`; the dependency-graph check also had no lockfile to inspect.
+
+   Fixed by tracking `flake.lock` and pinning a coherent dependency graph.
+
+10. **Confirm app omitted fragment tools from `PATH`**: The confirmation app checked generated lefthook commands using only its core utility runtime, so markdown and YAML wrappers were reported missing even though the dev shell contained them.
+
+    Fixed by adding the materialized fragment packages to the app runtime.
