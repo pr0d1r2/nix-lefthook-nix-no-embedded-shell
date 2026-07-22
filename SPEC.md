@@ -75,6 +75,27 @@ The scanner flags lines in `''` blocks:
 - Function definitions: `name() {`
 - `#!/bin/bash`, `#!/usr/bin/env bash`
 
+### Self-linting exception
+
+`flake.nix` is intentionally listed in `.nix-embedded-shell-allowlist`. The
+package wrapper is otherwise sourced from `lefthook-nix-no-embedded-shell.sh`,
+but `pkgs.writeShellApplication` must first bootstrap its `SCANNER` environment
+variable with the Nix store path of `scan-nix-no-embedded-shell.sh`:
+
+```nix
+text = ''
+  SCANNER="${scannerScript}"
+''
++ builtins.readFile ./lefthook-nix-no-embedded-shell.sh;
+```
+
+The scanner does not currently flag a bare variable assignment such as this
+one. It does flag other repository bootstrap code in `flake.nix`, including the
+`export` commands in the `confirm` app wrapper. Because allowlisting is
+file-granular, the narrow, repository-local entry covers all of that bootstrap
+code, including the `SCANNER` injection. It does not change scanner or wrapper
+behavior for consumers.
+
 ## §T — Tasks
 
 | status | id | goal |
@@ -87,7 +108,7 @@ The scanner flags lines in `''` blocks:
 | `x` | T6 | Add scanner detection of `source` and `.` (dot-source) commands as shell patterns |
 | `x` | T7 | Add test for allowlist with entry that does not match the scanned file (non-matching allowlist entry) |
 | `x` | T8 | Add detection of `#!/bin/bash` or `#!/usr/bin/env bash` shebang lines inside `''` blocks |
-| `.` | T9 | Document the self-linting exception in SPEC (flake.nix bootstraps `SCANNER=` via a small embedded snippet) |
+| `x` | T9 | Document the self-linting exception in SPEC (flake.nix bootstraps `SCANNER=` via a small embedded snippet) |
 
 ## §B — Bugs / Known Issues
 
@@ -97,7 +118,7 @@ The scanner flags lines in `''` blocks:
 
 3. **`.envrc` does not watch dependencies**: The `.envrc` contains only `use flake` and does not `watch_file` on `flake.nix`, `dev.sh`, or other nix modules. Changes to these files require manual `direnv reload`.
 
-4. **Self-referential embedded shell**: `flake.nix` line 202-204 contains `text = '' SCANNER="${scannerScript}" '' + builtins.readFile ...` — a small embedded shell snippet needed to inject the scanner path.
+4. **Self-referential embedded shell**: `flake.nix` contains a small embedded shell snippet needed to inject the scanner path, as documented in [Self-linting exception](#self-linting-exception).
 
     This would trigger the check itself, but the flake is in the allowlist by convention (the check runs on staged files that are `.nix`).
 

@@ -1,2 +1,2 @@
-# Bootstrap code injects Nix store paths into the confirm app wrapper.
+# Repository bootstrap code generates the package and confirm app wrappers.
 flake.nix
