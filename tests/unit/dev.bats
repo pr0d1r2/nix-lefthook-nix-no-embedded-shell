@@ -12,9 +12,9 @@ setup() {
     sed 's|@BATS_LIB_PATH@|/test/lib|' dev.sh > "$TMPDIR/dev.sh"
 
     mkdir -p "$TMPDIR/bin"
-    cat > "$TMPDIR/bin/lefthook" <<'SH'
-#!/usr/bin/env bash
-echo "lefthook $*" >> "$LEFTHOOK_LOG"
+    cat > "$TMPDIR/bin/lefthook" <<SH
+#!$BASH
+echo "lefthook \$*" >> "\$LEFTHOOK_LOG"
 SH
     chmod +x "$TMPDIR/bin/lefthook"
 }
