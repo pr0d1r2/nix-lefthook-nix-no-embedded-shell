@@ -80,7 +80,7 @@ The scanner flags lines inside `''` blocks matching:
 |---|---|---|
 | `x` | T1 | Expand `.envrc` to watch `flake.nix`, `dev.sh`, and nix modules per project direnv conventions |
 | `x` | T2 | Add bats test for wrapper behavior when multiple files have violations (verify all are reported) |
-| `.` | T3 | Add bats test for scanner handling of Nix string interpolation `''${}` inside multi-line blocks |
+| `x` | T3 | Add bats test for scanner handling of Nix string interpolation `''${}` inside multi-line blocks |
 | `.` | T4 | Add `checks` flake output that runs `bats tests/unit/` so `nix flake check` validates tests |
 | `.` | T5 | Align `actions/checkout` version in `update-pins.yml` (v4) with `ci.yml` (v6) |
 | `.` | T6 | Add scanner detection of `source` and `.` (dot-source) commands as shell patterns |

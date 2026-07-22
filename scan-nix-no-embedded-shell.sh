@@ -15,7 +15,7 @@ block_start=0
 i=0
 while [ "$i" -lt "$n" ]; do
   line="${lines[$i]}"
-  rest="$line"
+  rest="${line//\'\'\$\{/}"
   while [[ "$rest" == *"''"* ]]; do
     rest="${rest#*\'\'}"
     if [ "$in_block" -eq 0 ]; then

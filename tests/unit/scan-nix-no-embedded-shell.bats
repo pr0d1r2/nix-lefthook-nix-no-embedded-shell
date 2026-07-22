@@ -195,6 +195,20 @@ NIXEOF
     assert_output --partial "export BAR=baz"
 }
 
+@test "keeps Nix escaped interpolation inside multi-line string block" {
+    cat > "$TEST_TEMP/interpolation.nix" << 'NIXEOF'
+{
+  text = ''
+    ''${}
+    export AFTER_INTERPOLATION=true
+  '';
+}
+NIXEOF
+    run bash "$SCANNER" "$TEST_TEMP/interpolation.nix"
+    assert_success
+    assert_output --partial "export AFTER_INTERPOLATION=true"
+}
+
 @test "does not flag first line of multi-line string block" {
     cat > "$TEST_TEMP/firstline.nix" << 'NIXEOF'
 {
