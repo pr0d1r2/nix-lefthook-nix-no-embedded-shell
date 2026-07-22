@@ -90,15 +90,15 @@ The scanner flags lines inside `''` blocks matching:
 
 ## §B — Bugs / Known Issues
 
-1. **Scanner requires bash 4+**: `mapfile` (scan script) and `declare -A` (wrapper) are bash 4+ features. This is safe inside the Nix dev shell (which provides bash 5) but will fail on stock macOS bash 3.2 if invoked outside Nix.
+1. **Scanner requires bash 4+**: `mapfile` and `declare -A` work in the Nix dev shell (bash 5), but not in stock macOS bash 3.2.
 
-2. **Greedy `''` token matching**: The scanner toggles an `in_block` flag on every `''` occurrence in a line. Nix string interpolation escapes (`''${`, `'''`) and lines with multiple `''` tokens on the same line can cause the block tracker to lose sync, producing false positives or negatives.
+2. **Greedy `''` token matching**: Escapes (`''${`, `'''`) and multiple tokens per line can desynchronize `in_block`, producing false results.
 
 3. **`.envrc` does not watch dependencies**: The `.envrc` contains only `use flake` and does not `watch_file` on `flake.nix`, `dev.sh`, or other nix modules. Changes to these files require manual `direnv reload`.
 
 4. **Self-referential embedded shell**: `flake.nix` line 202-204 contains `text = '' SCANNER="${scannerScript}" '' + builtins.readFile ...` — a small embedded shell snippet needed to inject the scanner path.
 
-   This would trigger the check itself, but the flake is in the allowlist by convention (the check runs on staged files that are `.nix`).
+    This would trigger the check itself, but the flake is in the allowlist by convention (the check runs on staged files that are `.nix`).
 
 5. **No `source`/`.` detection**: The scanner does not flag `source` or `.` (dot-source) commands, which are common shell patterns that would indicate embedded shell code.
 
@@ -108,12 +108,16 @@ The scanner flags lines inside `''` blocks matching:
 
 8. **Duplicate `default` attribute in `packages`**: Migration left a stale `default = pkgs.mkShell { … }` block inside `packages`, colliding with the real `default = pkgs.writeShellApplication { … }`. Also left `scannerScript` undefined.
 
-   Fixed by removing the leftover `mkShell` block and adding a `let` binding for `scannerScript`.
+    Fixed by removing the leftover `mkShell` block and adding a `let` binding for `scannerScript`.
 
 9. **Unpinned flake inputs broke hook/package coherence**: `flake.lock` was ignored, so CI resolved a moving `set-and-setting` revision whose generated `lefthook.yml` referenced markdown and YAML wrappers absent from the dev-shell `PATH`; the dependency-graph check also had no lockfile to inspect.
 
-   Fixed by tracking `flake.lock` and pinning a coherent dependency graph.
+    Fixed by tracking `flake.lock` and pinning a coherent dependency graph.
 
 10. **Confirm app omitted fragment tools from `PATH`**: The confirmation app checked generated lefthook commands using only its core utility runtime, so markdown and YAML wrappers were reported missing even though the dev shell contained them.
 
     Fixed by adding the materialized fragment packages to the app runtime.
+
+11. **2026-07-22 — Invalid SPEC indentation**: Three continuations used three spaces.
+
+    Fixed by using four spaces.
