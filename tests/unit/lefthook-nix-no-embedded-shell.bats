@@ -98,6 +98,21 @@ NIXEOF
     assert_success
 }
 
+@test "does not skip a file when allowlist entry does not match" {
+    cat > "$TEST_TEMP/bad.nix" << 'NIXEOF'
+{
+  text = ''
+    export FOO=bar
+  '';
+}
+NIXEOF
+    echo "other.nix" > "$TEST_TEMP/.nix-embedded-shell-allowlist"
+    run lefthook-nix-no-embedded-shell "$TEST_TEMP/bad.nix"
+    assert_failure
+    assert_output --partial "bad.nix has embedded shell"
+    assert_output --partial "export FOO=bar"
+}
+
 @test "allowlist ignores comments and blank lines" {
     cat > "$TEST_TEMP/bad.nix" << 'NIXEOF'
 { pkgs }:

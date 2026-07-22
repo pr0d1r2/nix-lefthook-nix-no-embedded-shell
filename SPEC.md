@@ -84,7 +84,7 @@ The scanner flags lines inside `''` blocks matching:
 | `x` | T4 | Add `checks` flake output that runs `bats tests/unit/` so `nix flake check` validates tests |
 | `x` | T5 | Align `actions/checkout` version in `update-pins.yml` (v4) with `ci.yml` (v6) |
 | `x` | T6 | Add scanner detection of `source` and `.` (dot-source) commands as shell patterns |
-| `.` | T7 | Add test for allowlist with entry that does not match the scanned file (non-matching allowlist entry) |
+| `x` | T7 | Add test for allowlist with entry that does not match the scanned file (non-matching allowlist entry) |
 | `.` | T8 | Add detection of `#!/bin/bash` or `#!/usr/bin/env bash` shebang lines inside `''` blocks |
 | `.` | T9 | Document the self-linting exception in SPEC (flake.nix bootstraps `SCANNER=` via a small embedded snippet) |
 
