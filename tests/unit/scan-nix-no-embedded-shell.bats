@@ -91,6 +91,47 @@ NIXEOF
     assert_output --partial "echo"
 }
 
+@test "detects bin bash shebang inside multi-line string" {
+    cat > "$TEST_TEMP/bin-bash-shebang.nix" << 'NIXEOF'
+{
+  text = ''
+    #!/bin/bash
+  '';
+}
+NIXEOF
+    run bash "$SCANNER" "$TEST_TEMP/bin-bash-shebang.nix"
+    assert_success
+    assert_output "    3:     #!/bin/bash"
+}
+
+@test "detects env bash shebang inside multi-line string" {
+    cat > "$TEST_TEMP/env-bash-shebang.nix" << 'NIXEOF'
+{
+  text = ''
+    #!/usr/bin/env bash
+  '';
+}
+NIXEOF
+    run bash "$SCANNER" "$TEST_TEMP/env-bash-shebang.nix"
+    assert_success
+    assert_output "    3:     #!/usr/bin/env bash"
+}
+
+@test "does not detect non-bash shebangs inside multi-line string" {
+    cat > "$TEST_TEMP/non-bash-shebangs.nix" << 'NIXEOF'
+{
+  text = ''
+    #!/bin/sh
+    #!/usr/bin/env python
+    #!/bin/bashful
+  '';
+}
+NIXEOF
+    run bash "$SCANNER" "$TEST_TEMP/non-bash-shebangs.nix"
+    assert_success
+    assert_output ""
+}
+
 @test "detects function definition inside multi-line string" {
     cat > "$TEST_TEMP/func.nix" << 'NIXEOF'
 {

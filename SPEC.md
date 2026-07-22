@@ -68,11 +68,12 @@ Target users are Nix developers who want to maintain clean separation between Ni
 
 ### Shell patterns detected
 
-The scanner flags lines inside `''` blocks matching:
+The scanner flags lines in `''` blocks:
 
 - `set -[eux]+`, `export`, `unset`, `echo`, `printf`, `exec`, `source`, `.`
 - `if`, `elif`, `for`, `while`, `until`, `case`, `exit`, `return`, `local`
 - Function definitions: `name() {`
+- `#!/bin/bash`, `#!/usr/bin/env bash`
 
 ## §T — Tasks
 
@@ -85,7 +86,7 @@ The scanner flags lines inside `''` blocks matching:
 | `x` | T5 | Align `actions/checkout` version in `update-pins.yml` (v4) with `ci.yml` (v6) |
 | `x` | T6 | Add scanner detection of `source` and `.` (dot-source) commands as shell patterns |
 | `x` | T7 | Add test for allowlist with entry that does not match the scanned file (non-matching allowlist entry) |
-| `.` | T8 | Add detection of `#!/bin/bash` or `#!/usr/bin/env bash` shebang lines inside `''` blocks |
+| `x` | T8 | Add detection of `#!/bin/bash` or `#!/usr/bin/env bash` shebang lines inside `''` blocks |
 | `.` | T9 | Document the self-linting exception in SPEC (flake.nix bootstraps `SCANNER=` via a small embedded snippet) |
 
 ## §B — Bugs / Known Issues
