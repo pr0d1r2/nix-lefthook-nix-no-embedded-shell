@@ -179,6 +179,45 @@ NIXEOF
     assert_output --partial "printf"
 }
 
+@test "detects source command inside multi-line string" {
+    cat > "$TEST_TEMP/source.nix" << 'NIXEOF'
+{
+  text = ''
+    source ./environment.sh
+  '';
+}
+NIXEOF
+    run bash "$SCANNER" "$TEST_TEMP/source.nix"
+    assert_success
+    assert_output --partial "source ./environment.sh"
+}
+
+@test "detects dot-source command inside multi-line string" {
+    cat > "$TEST_TEMP/dot-source.nix" << 'NIXEOF'
+{
+  text = ''
+    . ./environment.sh
+  '';
+}
+NIXEOF
+    run bash "$SCANNER" "$TEST_TEMP/dot-source.nix"
+    assert_success
+    assert_output --partial ". ./environment.sh"
+}
+
+@test "does not treat an executable path as dot-source command" {
+    cat > "$TEST_TEMP/executable-path.nix" << 'NIXEOF'
+{
+  text = ''
+    ./environment.sh
+  '';
+}
+NIXEOF
+    run bash "$SCANNER" "$TEST_TEMP/executable-path.nix"
+    assert_success
+    assert_output ""
+}
+
 @test "handles multiple multi-line string blocks" {
     cat > "$TEST_TEMP/twoBlocks.nix" << 'NIXEOF'
 {
