@@ -5,7 +5,7 @@ set -euo pipefail
 
 file="$1"
 
-shell_pattern='^[[:space:]]*(set -[eux]+|export |unset |echo |printf |exec |if |elif |for |while |until |case |exit |return |local )'
+shell_pattern='^[[:space:]]*(set -[eux]+|export |unset |echo |printf |exec |if |elif |for |while |until |case |exit |return |local |source[[:space:]]+|\.[[:space:]]+)'
 func_pattern='^[[:space:]]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\(\)[[:space:]]*\{'
 
 mapfile -t lines <"$file"
