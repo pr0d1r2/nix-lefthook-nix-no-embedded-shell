@@ -15,9 +15,13 @@ block_start=0
 i=0
 while [ "$i" -lt "$n" ]; do
   line="${lines[$i]}"
-  rest="${line//\'\'\$\{/}"
+  rest="$line"
   while [[ "$rest" == *"''"* ]]; do
     rest="${rest#*\'\'}"
+    if [ "$in_block" -eq 1 ] && [[ "$rest" == '${'* ]]; then
+      rest="${rest:2}"
+      continue
+    fi
     if [ "$in_block" -eq 0 ]; then
       in_block=1
       block_start=$((i + 1))
