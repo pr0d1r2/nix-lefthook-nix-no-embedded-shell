@@ -8,6 +8,7 @@ setup() {
     cp "$BATS_TEST_DIRNAME/../../.envrc" "$TEST_TEMP/.envrc"
     mkdir -p "$TEST_TEMP/nix/dev"
     touch "$TEST_TEMP/flake.nix"
+    touch "$TEST_TEMP/flake.lock"
     touch "$TEST_TEMP/dev.sh"
     touch "$TEST_TEMP/nix/packages.nix"
     touch "$TEST_TEMP/nix/dev/shell.nix"
@@ -17,7 +18,7 @@ teardown() {
     rm -rf "$TEST_TEMP"
 }
 
-@test "watches flake, dev hook, and recursive nix modules before using flake" {
+@test "watches flake inputs, dev hook, and recursive nix dependencies before using flake" {
     cd "$TEST_TEMP"
 
     watch_file() {
@@ -32,9 +33,11 @@ teardown() {
 
     assert_success
     assert_line --index 0 "watch flake.nix"
-    assert_line --index 1 "watch dev.sh"
-    assert_line --index 2 "watch nix"
+    assert_line --index 1 "watch flake.lock"
+    assert_line --index 2 "watch dev.sh"
+    assert_line --index 3 "watch nix"
+    assert_line "watch nix/dev"
     assert_line "watch nix/packages.nix"
     assert_line "watch nix/dev/shell.nix"
-    assert_line --index 5 "use flake"
+    assert_line --index 7 "use flake"
 }
