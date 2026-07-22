@@ -1,0 +1,2 @@
+# Bootstrap code injects Nix store paths into the confirm app wrapper.
+flake.nix

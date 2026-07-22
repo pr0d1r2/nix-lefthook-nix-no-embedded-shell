@@ -101,3 +101,5 @@ The scanner flags lines inside `''` blocks matching:
 7. **`nix flake check` runs without `checks` output**: The lefthook config runs `nix flake check` but the flake only defines `packages` and `devShells` — no `checks` attribute. The command still validates derivation evaluation but does not run tests.
 
 8. **Duplicate `default` attribute in `packages`**: Migration left a stale `default = pkgs.mkShell { … }` block inside `packages`, colliding with the real `default = pkgs.writeShellApplication { … }`. Also left `scannerScript` undefined. Fixed by removing the leftover `mkShell` block and adding a `let` binding for `scannerScript`.
+
+9. **Unpinned flake inputs broke hook/package coherence**: `flake.lock` was ignored, so CI resolved a moving `set-and-setting` revision whose generated `lefthook.yml` referenced markdown and YAML wrappers absent from the dev-shell `PATH`; the dependency-graph check also had no lockfile to inspect. Fixed by tracking `flake.lock` and pinning a coherent dependency graph.
