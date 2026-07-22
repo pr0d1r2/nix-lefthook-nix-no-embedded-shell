@@ -81,6 +81,13 @@
 
       checks = forAllSystems (
         pkgs:
+        let
+          bats = pkgs.bats.withLibraries (libraries: [
+            libraries.bats-assert
+            libraries.bats-file
+            libraries.bats-support
+          ]);
+        in
         (set-and-setting.lib.checksFor {
           inherit pkgs fragments;
           src = ./.;
@@ -90,6 +97,20 @@
             inherit pkgs;
             projectRoot = ./.;
           };
+          unit-tests =
+            pkgs.runCommand "unit-tests"
+              {
+                nativeBuildInputs = [
+                  bats
+                  pkgs.git
+                  self.packages.${pkgs.stdenv.hostPlatform.system}.default
+                ];
+              }
+              ''
+                cd ${./.}
+                bats tests/unit/
+                touch "$out"
+              '';
           default = pkgs.runCommand "checks" { } "touch $out";
         }
       );
