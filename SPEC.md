@@ -145,3 +145,7 @@ behavior for consumers.
     Fixed by using four spaces.
 
 12. **2026-07-22 — SC2016**: Single-quoted `${` match; fixed with escaped `$`.
+
+13. **2026-07-25 — Stale workflow test**: `tests/unit/workflows.bats` still referenced `.github/workflows/update-pins.yml` after the workflow was dropped in the pin-refresh commit.
+
+    Fixed by removing the obsolete test file.
