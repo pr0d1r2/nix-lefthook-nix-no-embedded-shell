@@ -149,3 +149,7 @@ behavior for consumers.
 13. **2026-07-25 — Stale workflow test**: `tests/unit/workflows.bats` still referenced `.github/workflows/update-pins.yml` after the workflow was dropped in the pin-refresh commit.
 
     Fixed by removing the obsolete test file.
+
+14. **2026-07-28 — Flake lock exceeded its file-size budget**: The generated `flake.lock` grew to 120,413 bytes after the pin refresh, exceeding the 65,536-byte `.lock` limit.
+
+    Fixed by raising only the `.lock` file-size budget to 131,072 bytes.
