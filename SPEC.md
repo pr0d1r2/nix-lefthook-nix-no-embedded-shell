@@ -153,3 +153,7 @@ behavior for consumers.
 14. **2026-07-28 — Flake lock exceeded its file-size budget**: The generated `flake.lock` grew to 120,413 bytes after the pin refresh, exceeding the 65,536-byte `.lock` limit.
 
     Fixed by raising only the `.lock` file-size budget to 131,072 bytes.
+
+15. **2026-07-29 — `set-and-setting` pinned to version without `lib` output**: `nix flake update` bumped `set-and-setting` to rev `d2fa92cc` which temporarily removed its `lib` flake output, breaking all `set-and-setting.lib.*` calls in `flake.nix`. The resulting lock file also exceeded the 131,072-byte `.lock` limit.
+
+    Fixed by updating `set-and-setting` to rev `92febe03` (which restored `lib`) and raising the `.lock` file-size budget to 524,288 bytes.
