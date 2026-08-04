@@ -25,7 +25,7 @@ Target users are Nix developers who want to maintain clean separation between Ni
 13. Shell scripts must not define functions; logic is split into separate scripts.
 14. Scripts are invoked via `bash script.sh`, never `./script.sh`.
 15. The `dev.sh` shell hook installs lefthook only when `.git/hooks/pre-commit` is absent.
-16. The `devShells.ci` output is identical to `devShells.default` (aliased via `ci = default`).
+16. The flake delegates outputs to `set-and-setting.lib.mkConsumerFlake`.
 
 ## §I — Interfaces
 
@@ -41,8 +41,10 @@ Target users are Nix developers who want to maintain clean separation between Ni
 | output | type | description |
 |---|---|---|
 | `packages.<system>.default` | `writeShellApplication` | The `lefthook-nix-no-embedded-shell` wrapper binary |
+| `packages.<system>.setting` | materialized setting | Sync-setting binary for config materialization |
 | `devShells.<system>.default` | `mkShell` | Dev shell with all tools, lefthook wrappers, and bats |
-| `devShells.<system>.ci` | `mkShell` | Alias of `default` for CI usage |
+| `devShells.<system>.agentic` | `mkShell` | Agentic dev shell (extends default) |
+| `devShells.<system>.ruby` | `mkShell` | Ruby dev shell (extends default) |
 
 ### Config files
 
@@ -84,17 +86,15 @@ variable with the Nix store path of `scan-nix-no-embedded-shell.sh`:
 
 ```nix
 text = ''
-  SCANNER="${scannerScript}"
+  SCANNER="${./scan-nix-no-embedded-shell.sh}"
 ''
 + builtins.readFile ./lefthook-nix-no-embedded-shell.sh;
 ```
 
 The scanner does not currently flag a bare variable assignment such as this
-one. It does flag other repository bootstrap code in `flake.nix`, including the
-`export` commands in the `confirm` app wrapper. Because allowlisting is
-file-granular, the narrow, repository-local entry covers all of that bootstrap
-code, including the `SCANNER` injection. It does not change scanner or wrapper
-behavior for consumers.
+one. Because allowlisting is file-granular, the narrow, repository-local entry
+covers the `SCANNER` injection. It does not change scanner or wrapper behavior
+for consumers.
 
 ## §T — Tasks
 
@@ -157,3 +157,7 @@ behavior for consumers.
 15. **2026-07-29 — `set-and-setting` pinned to version without `lib` output**: `nix flake update` bumped `set-and-setting` to rev `d2fa92cc` which temporarily removed its `lib` flake output, breaking all `set-and-setting.lib.*` calls in `flake.nix`. The resulting lock file also exceeded the 131,072-byte `.lock` limit.
 
     Fixed by updating `set-and-setting` to rev `92febe03` (which restored `lib`) and raising the `.lock` file-size budget to 524,288 bytes.
+
+16. **2026-08-04 — `flake-manifest-check` failed: hand-rolled outputs body**: The `flake.nix` used a top-level `let` block with `supportedSystems`, `forAllSystems`, and `fragments` bindings, and constructed the outputs attrset inline. The `set-and-setting` `flake-manifest` check (strict mode) disallows top-level `let` expressions and non-manifest attributes in the outputs body.
+
+    Fixed by delegating outputs to `set-and-setting.lib.mkConsumerFlake` with `extraPackages` and `extraChecks` for project-specific additions, and inlining `let` bindings that would trigger the `: let` pattern.
