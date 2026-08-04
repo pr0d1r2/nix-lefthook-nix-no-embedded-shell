@@ -7009,11 +7009,11 @@
         "nixpkgs-lock": "nixpkgs-lock_17"
       },
       "locked": {
-        "lastModified": 1785772545,
-        "narHash": "sha256-P6fKFf+/MQWqd9GHQokpmvLTzoCS3xD7ek1pNUE8qws=",
+        "lastModified": 1785810742,
+        "narHash": "sha256-oqNPSNzzot9PfqqGZmivVEqwMSMYeFI0TVg208F3lc8=",
         "owner": "pr0d1r2",
         "repo": "set-and-setting",
-        "rev": "617bbae76365e5ebe1e3c0b0c7277b2fbab5878b",
+        "rev": "c7bc4c03da123691bcbfdb04d06c8be9c9b65dd0",
         "type": "github"
       },
       "original": {
