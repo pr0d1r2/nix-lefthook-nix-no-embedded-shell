@@ -136,6 +136,10 @@ for consumers.
 
     Fixed by tracking `flake.lock` and pinning a coherent dependency graph.
 
+10. **Duplicated nixpkgs lock nodes**: `flake.lock` contained a second `nixpkgs-lock`/`nixpkgs` pair for `set-and-setting`, causing the lock-graph guardrail to fail.
+
+    Fixed by reusing the root `nixpkgs-lock` node from `set-and-setting` and removing the duplicate nodes.
+
 10. **Confirm app omitted fragment tools from `PATH`**: The confirmation app checked generated lefthook commands using only its core utility runtime, so markdown and YAML wrappers were reported missing even though the dev shell contained them.
 
     Fixed by adding the materialized fragment packages to the app runtime.
