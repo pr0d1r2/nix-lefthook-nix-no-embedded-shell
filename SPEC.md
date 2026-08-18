@@ -177,3 +177,7 @@ for consumers.
 19. **2026-08-18 — Lefthook fidelity drift**: Removing the duplicate standard Nix check also removed the repository-local embedded-shell scanner hooks, so materialized `lefthook.yml` no longer matched the pinned standard assembly.
 
     Fixed by restoring the distinct scanner command in `pre-commit` and `pre-push` while leaving the standard `nix-flake-check` command to the `nix` fragment.
+
+20. **2026-08-18 — Missing actions fragment**: The consumer flake omitted the standard `actions` fragment, so materialized `lefthook.yml` lacked the expected `actionlint` commands and failed the fidelity guardrail.
+
+    Fixed by including the `actions` fragment in the consumer flake assembly.
