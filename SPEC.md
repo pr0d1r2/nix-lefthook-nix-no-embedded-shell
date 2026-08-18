@@ -169,3 +169,7 @@ for consumers.
 17. **2026-08-11 — Lock graph retained duplicate nixpkgs nodes**: The generated lockfile deduplication was not stable because the root flake left `set-and-setting`'s nixpkgs inputs unconstrained, so Nix recreated a second nixpkgs lock node during evaluation.
 
     Fixed by declaring both shared inputs with explicit `follows` relationships in `flake.nix` and regenerating the lockfile.
+
+18. **2026-08-18 — Duplicate `nix-flake-check` Lefthook command**: The repo fragment duplicated the command already supplied by the standard `nix` fragment, producing invalid YAML after materialization.
+
+    Fixed by removing the redundant repo-local command and retaining the standard fragment's definition.
