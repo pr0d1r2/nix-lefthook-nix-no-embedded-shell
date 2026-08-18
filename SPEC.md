@@ -136,6 +136,10 @@ for consumers.
 
     Fixed by tracking `flake.lock` and pinning a coherent dependency graph.
 
+10. **Duplicated nixpkgs lock nodes**: `flake.lock` contained a second `nixpkgs-lock`/`nixpkgs` pair for `set-and-setting`, causing the lock-graph guardrail to fail.
+
+    Fixed by reusing the root `nixpkgs-lock` node from `set-and-setting` and removing the duplicate nodes.
+
 10. **Confirm app omitted fragment tools from `PATH`**: The confirmation app checked generated lefthook commands using only its core utility runtime, so markdown and YAML wrappers were reported missing even though the dev shell contained them.
 
     Fixed by adding the materialized fragment packages to the app runtime.
@@ -161,3 +165,7 @@ for consumers.
 16. **2026-08-04 — `flake-manifest-check` failed: hand-rolled outputs body**: The `flake.nix` used a top-level `let` block with `supportedSystems`, `forAllSystems`, and `fragments` bindings, and constructed the outputs attrset inline. The `set-and-setting` `flake-manifest` check (strict mode) disallows top-level `let` expressions and non-manifest attributes in the outputs body.
 
     Fixed by delegating outputs to `set-and-setting.lib.mkConsumerFlake` with `extraPackages` and `extraChecks` for project-specific additions, and inlining `let` bindings that would trigger the `: let` pattern.
+
+17. **2026-08-11 — Lock graph retained duplicate nixpkgs nodes**: The generated lockfile deduplication was not stable because the root flake left `set-and-setting`'s nixpkgs inputs unconstrained, so Nix recreated a second nixpkgs lock node during evaluation.
+
+    Fixed by declaring both shared inputs with explicit `follows` relationships in `flake.nix` and regenerating the lockfile.
