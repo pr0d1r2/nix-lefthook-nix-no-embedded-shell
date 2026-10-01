@@ -140,32 +140,32 @@ for consumers.
 
     Fixed by reusing the root `nixpkgs-lock` node from `set-and-setting` and removing the duplicate nodes.
 
-10. **Confirm app omitted fragment tools from `PATH`**: The confirmation app checked generated lefthook commands using only its core utility runtime, so markdown and YAML wrappers were reported missing even though the dev shell contained them.
+11. **Confirm app omitted fragment tools from `PATH`**: The confirmation app checked generated lefthook commands using only its core utility runtime, so markdown and YAML wrappers were reported missing even though the dev shell contained them.
 
     Fixed by adding the materialized fragment packages to the app runtime.
 
-11. **2026-07-22 — Invalid SPEC indentation**: Three continuations used three spaces.
+12. **2026-07-22 — Invalid SPEC indentation**: Three continuations used three spaces.
 
     Fixed by using four spaces.
 
-12. **2026-07-22 — SC2016**: Single-quoted `${` match; fixed with escaped `$`.
+13. **2026-07-22 — SC2016**: Single-quoted `${` match; fixed with escaped `$`.
 
-13. **2026-07-25 — Stale workflow test**: `tests/unit/workflows.bats` still referenced `.github/workflows/update-pins.yml` after the workflow was dropped in the pin-refresh commit.
+14. **2026-07-25 — Stale workflow test**: `tests/unit/workflows.bats` still referenced `.github/workflows/update-pins.yml` after the workflow was dropped in the pin-refresh commit.
 
     Fixed by removing the obsolete test file.
 
-14. **2026-07-28 — Flake lock exceeded its file-size budget**: The generated `flake.lock` grew to 120,413 bytes after the pin refresh, exceeding the 65,536-byte `.lock` limit.
+15. **2026-07-28 — Flake lock exceeded its file-size budget**: The generated `flake.lock` grew to 120,413 bytes after the pin refresh, exceeding the 65,536-byte `.lock` limit.
 
     Fixed by raising only the `.lock` file-size budget to 131,072 bytes.
 
-15. **2026-07-29 — `set-and-setting` pinned to version without `lib` output**: `nix flake update` bumped `set-and-setting` to rev `d2fa92cc` which temporarily removed its `lib` flake output, breaking all `set-and-setting.lib.*` calls in `flake.nix`. The resulting lock file also exceeded the 131,072-byte `.lock` limit.
+16. **2026-07-29 — `set-and-setting` pinned to version without `lib` output**: `nix flake update` bumped `set-and-setting` to rev `d2fa92cc` which temporarily removed its `lib` flake output, breaking all `set-and-setting.lib.*` calls in `flake.nix`. The resulting lock file also exceeded the 131,072-byte `.lock` limit.
 
     Fixed by updating `set-and-setting` to rev `92febe03` (which restored `lib`) and raising the `.lock` file-size budget to 524,288 bytes.
 
-16. **2026-08-04 — `flake-manifest-check` failed: hand-rolled outputs body**: The `flake.nix` used a top-level `let` block with `supportedSystems`, `forAllSystems`, and `fragments` bindings, and constructed the outputs attrset inline. The `set-and-setting` `flake-manifest` check (strict mode) disallows top-level `let` expressions and non-manifest attributes in the outputs body.
+17. **2026-08-04 — `flake-manifest-check` failed: hand-rolled outputs body**: The `flake.nix` used a top-level `let` block with `supportedSystems`, `forAllSystems`, and `fragments` bindings, and constructed the outputs attrset inline. The `set-and-setting` `flake-manifest` check (strict mode) disallows top-level `let` expressions and non-manifest attributes in the outputs body.
 
     Fixed by delegating outputs to `set-and-setting.lib.mkConsumerFlake` with `extraPackages` and `extraChecks` for project-specific additions, and inlining `let` bindings that would trigger the `: let` pattern.
 
-17. **2026-08-11 — Lock graph retained duplicate nixpkgs nodes**: The generated lockfile deduplication was not stable because the root flake left `set-and-setting`'s nixpkgs inputs unconstrained, so Nix recreated a second nixpkgs lock node during evaluation.
+18. **2026-08-11 — Lock graph retained duplicate nixpkgs nodes**: The generated lockfile deduplication was not stable because the root flake left `set-and-setting`'s nixpkgs inputs unconstrained, so Nix recreated a second nixpkgs lock node during evaluation.
 
     Fixed by declaring both shared inputs with explicit `follows` relationships in `flake.nix` and regenerating the lockfile.
