@@ -18,7 +18,7 @@ teardown() {
     rm -rf "$TEST_TEMP"
 }
 
-@test "watches flake inputs, dev hook, and recursive nix dependencies before using flake" {
+@test "watches flake inputs, dev hook, hook script, and recursive nix dependencies before using flake" {
     cd "$TEST_TEMP"
 
     watch_file() {
@@ -35,9 +35,10 @@ teardown() {
     assert_line --index 0 "watch flake.nix"
     assert_line --index 1 "watch flake.lock"
     assert_line --index 2 "watch dev.sh"
-    assert_line --index 3 "watch nix"
+    assert_line --index 3 "watch lefthook-nix-no-embedded-shell.sh"
+    assert_line --index 4 "watch nix"
     assert_line "watch nix/dev"
     assert_line "watch nix/packages.nix"
     assert_line "watch nix/dev/shell.nix"
-    assert_line --index 7 "use flake"
+    assert_line --index 8 "use flake"
 }
