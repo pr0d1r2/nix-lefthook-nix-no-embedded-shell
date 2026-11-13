@@ -10,4 +10,4 @@ name: CI
 jobs:
   guardrails:
     # standard-current
-    uses: pr0d1r2/set-and-setting/.github/workflows/guardrails.yml@58f87fb52103ac58802e5758c805c5b657e1e9a4
+    uses: pr0d1r2/set-and-setting/.github/workflows/guardrails.yml@75aa94842ed97f7225b76c1b9684297670bc82f0
