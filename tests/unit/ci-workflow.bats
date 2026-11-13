@@ -5,7 +5,7 @@ setup() {
 }
 
 @test "every uses reference is pinned to a full 40-character commit SHA" {
-  run grep -E '^\s*uses:' "$CI_YML"
+  run grep -E '^\s*(-\s+)?uses:' "$CI_YML"
   [ "$status" -eq 0 ]
   while IFS= read -r line; do
     [[ "$line" =~ @[0-9a-f]{40}$ ]]
