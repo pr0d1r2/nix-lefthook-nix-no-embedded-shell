@@ -8,6 +8,9 @@ setup() {
   run grep -E '^\s*(-\s+)?uses:' "$CI_YML"
   [ "$status" -eq 0 ]
   while IFS= read -r line; do
-    [[ "$line" =~ @[0-9a-f]{40}$ ]]
+    ref="${line#*uses:}"
+    ref="${ref%%#*}"
+    ref="${ref//[\"\' ]/}"
+    [[ "$ref" =~ @[0-9a-f]{40}$ ]]
   done <<<"$output"
 }
